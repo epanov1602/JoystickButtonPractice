@@ -15,7 +15,7 @@ public class AimToVisualTarget extends CommandBase {
   private final int m_targetPipelineIndex;
 
   private static final double TargetXTolerance = 5; // plus minus five pixels is fine
-  private static final double SeekingTurnSpeed = 0.2;
+  private static final double SeekingTurnSpeed = 0.15;
   private static final double MaxTurnSpeed = 0.4;
 
   public AimToVisualTarget(Drivetrain drivetrain, RomiLimelight camera, int targetPipelineIndex) {
@@ -41,7 +41,7 @@ public class AimToVisualTarget extends CommandBase {
     } else {
       System.out.println("target at x=" + targetX);
       // if X is negative, we want to turn right; if X is positive, we want to turn left
-      double turnSpeed = -targetX * SeekingTurnSpeed / 30;
+      double turnSpeed = -targetX * SeekingTurnSpeed / 15;
       // 30 is the maximum value of X in Limelight: so if X is already closer than 30, we want to be turning slower than SeekingTurnSpeed (to avoid overshooting)
       if (turnSpeed > MaxTurnSpeed)
         turnSpeed = MaxTurnSpeed;

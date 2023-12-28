@@ -38,6 +38,7 @@ public class GoToVisualTarget extends CommandBase {
   public void execute() {
     double targetX = m_camera.getX();
     if (targetX == 0) {
+      m_drivetrain.arcadeDrive(0, SeekingTurnSpeed);
       // we don't see the target, let's do nothing; isFinished() will return true and this command will finish
     }
     else {
@@ -73,14 +74,19 @@ public class GoToVisualTarget extends CommandBase {
   @Override
   public boolean isFinished() {
     double targetX = m_camera.getX();
-    if (targetX == 0)
-      return true; // if target is lost, we lost it => finished
+    if (targetX == 0) {
+      System.out.println("target lost");
+      return false; // if target is lost, we lost it => finished
+    }
 
     if (-TargetXTolerance < targetX && targetX < TargetXTolerance) {
       // if target is pretty close to center of the screen, just check that we are at good distance to it
       double targetSize = m_camera.getA();
-      if (targetSize != 0 && targetSize >= m_desiredTargetSize)
+      if (targetSize != 0 && targetSize >= m_desiredTargetSize) {
+      System.out.println("reached destination because correct target size"+targetSize);
+
         return true; // good distance too => we are finished
+      }
     }
     // othwerwise, not there yet
     return false;

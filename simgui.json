@@ -4,5 +4,12 @@
       "/FMSInfo": "FMSInfo",
       "/SmartDashboard/SendableChooser[0]": "String Chooser"
     }
+  },
+  "NetworkTables": {
+    "transitory": {
+      "odometry": {
+        "open": true
+      }
+    }
   }
 }

@@ -96,14 +96,25 @@ public class RobotContainer {
     // setup a command to go to where the toy car approximately is, find it there, and then approach it
     Command longRoutine = new SequentialCommandGroup(
       new GoToPoint(m_drivetrain, 40, 40, 2),
-      new PrintCommand("went to point"),
+      new PrintCommand("went to point, looking for toy car"),
       new AimToVisualTarget(m_drivetrain, m_camera, 2),
       new PrintCommand("found a toy car"),
       new GoToVisualTarget(m_drivetrain, m_camera, 2, 1.5),
-      new PrintCommand("approached the toy car")
+      new PrintCommand("approached the toy car"),
+      new PrintCommand("grabbed toy car"),
+      new GoToPoint(m_drivetrain, 40, 40, 2),
+      new PrintCommand("went to point, looking for apriltag"),
+      new AimToVisualTarget(m_drivetrain, m_camera, 3),
+      new PrintCommand("located apriltag"),
+      new GoToVisualTarget(m_drivetrain, m_camera, 3, 6),
+      new PrintCommand("arrived at apriltag")
     );
 
     m_autonomousCommand = longRoutine;
+  }
+
+  private String message(String string) {
+    return null;
   }
 
   /**
