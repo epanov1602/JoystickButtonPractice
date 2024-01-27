@@ -32,7 +32,7 @@ public class RobotContainer {
 
   /* what this robot consists of? */
   private final Drivetrain m_drivetrain = new Drivetrain();
-  private final RomiLimelight m_camera = new RomiLimelight();
+  //private final RomiLimelight m_camera = new RomiLimelight();
   private final OnBoardIO m_onboardIO = new OnBoardIO(ChannelMode.INPUT, ChannelMode.INPUT);
   private final Joystick m_joystick = new Joystick(0);
 
