@@ -6,10 +6,10 @@ package frc.robot.commands;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Drivetrain;
 
-public class GoToPoint extends CommandBase {
+public class GoToPoint extends Command {
   private Drivetrain m_drivetrain;
   private double m_targetX, m_targetY, m_distanceTolerance;
 

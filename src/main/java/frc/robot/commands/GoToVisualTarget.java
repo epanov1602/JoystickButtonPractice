@@ -4,11 +4,11 @@
 
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.sensors.RomiLimelight;
 import frc.robot.subsystems.Drivetrain;
 
-public class GoToVisualTarget extends CommandBase {
+public class GoToVisualTarget extends Command {
   private final Drivetrain m_drivetrain;
   private final RomiLimelight m_camera;
   private final int m_targetPipelineIndex;
