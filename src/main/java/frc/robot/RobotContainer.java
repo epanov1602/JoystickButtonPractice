@@ -48,10 +48,34 @@ public class RobotContainer {
     Command goForward30Inches = new DriveDistance(0.5, 30, m_drivetrain);
     m_autonomousCommand = goForward30Inches;
 
-    // a command for joystick button 1 is for robot to go to the scoring location at X=30, Y=-10
-    Command goToScoringPoint = new GoToPoint(m_drivetrain, 30, -10, 3); 
-    JoystickButton button1 = new JoystickButton(m_joystick, 1);
-    button1.onTrue(goToScoringPoint);
+    Command rotateRightTwoTimes = new TurnDegrees(0.8, 720, m_drivetrain);
+    JoystickButton button4 = new JoystickButton(m_joystick, 4);
+    button4.onTrue(rotateRightTwoTimes);
+
+    m_autonomousCommand = rotateRightTwoTimes;
+
+    Command goNorthAndTurnSouth = new SequentialCommandGroup(
+      new GoToPoint(m_drivetrain, 40, 10, 2),
+      new AimToDirection(m_drivetrain, 90)
+    );
+    JoystickButton button2 = new JoystickButton(m_joystick, 2);
+    button2.onTrue(goNorthAndTurnSouth);
+
+    Command triangularRace = new SequentialCommandGroup(
+      new GoToPoint(m_drivetrain, 40, 0, 2),
+      new GoToPoint(m_drivetrain, 40, 40, 2),
+      new GoToPoint(m_drivetrain, 0, 0, 2),
+      new GoToPoint(m_drivetrain, 40, 0, 2),
+      new GoToPoint(m_drivetrain, 40, 40, 2),
+      new GoToPoint(m_drivetrain, 0, 0, 2),
+      new AimToDirection(m_drivetrain, 0)
+    );
+
+    m_autonomousCommand = triangularRace;
+
+    JoystickButton button3 = new JoystickButton(m_joystick, 3);
+    button3.onTrue(triangularRace);
+
   }
 
   public Command getAutonomousCommand() {

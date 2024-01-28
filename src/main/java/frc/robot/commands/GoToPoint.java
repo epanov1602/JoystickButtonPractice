@@ -13,8 +13,8 @@ public class GoToPoint extends CommandBase {
   private Drivetrain m_drivetrain;
   private double m_targetX, m_targetY, m_distanceTolerance;
 
-  private static final double ForwardSpeed = 0.35;
-  private static final double TurningSpeed = 0.2;
+  private static final double ForwardSpeed = 0.9;
+  private static final double TurningSpeed = 0.275;
   private static final double DirectionToleranceDegrees = 20; // plus minus 20 degrees of direction tolerance is ok
 
   /** Creates a new GoToTarget. */
