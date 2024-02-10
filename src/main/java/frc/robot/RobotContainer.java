@@ -47,41 +47,6 @@ public class RobotContainer {
     // the default AUTONOMOUS command is to go forward by 40 inches
     Command goToPointNorth = new GoToPoint(m_drivetrain, 40, 0, false);
     m_autonomousCommand = goToPointNorth;
-
-    // create a command to reset odometry, and bind it to joystign button Y 
-    Command resetOdometry = new ResetOdometry(m_drivetrain);
-    JoystickButton buttonY = new JoystickButton(m_joystick0, Button.kY.value);
-    buttonY.onTrue(resetOdometry);
-
-    // create a command for bagel pickup and assign it to button B
-    Command pickUpBagel = new MockPickupCommand(m_drivetrain);
-    JoystickButton buttonB = new JoystickButton(m_joystick0, Button.kB.value);
-    buttonB.onTrue(pickUpBagel);
-
-    // create a more useful autonomous command
-    Command turnAroundToAim = new AimToDirection(m_drivetrain, -135);
-    Command shoot = new MockShootCommand(m_drivetrain);
-    Command goToBagel2 = new GoToPoint(m_drivetrain, 30, -10, false);
-    Command pickUpBagel2 = new MockPickupCommand(m_drivetrain);
-    Command goBackToSpeaker = new GoToPoint(m_drivetrain, 10, -20, false);
-    Command aimAgain = new AimToDirection(m_drivetrain, -180);
-    Command shootAgain = new MockShootCommand(m_drivetrain);
-    Command bigAutonomousRoutine = new SequentialCommandGroup(turnAroundToAim, shoot, goToBagel2, pickUpBagel2, goBackToSpeaker, aimAgain, shootAgain);
-    m_autonomousCommand = bigAutonomousRoutine;
-
-    // create a command for following the left side of the field and turning to the speaker to shoot, and assign it to the left bumper
-    Command goToLeftSide = new GoToPoint(m_drivetrain, 60, -10, true);
-    Command turnSouth1 = new AimToDirection(m_drivetrain, 180);
-    Command goToLeftSideCorner = new GoToPoint(m_drivetrain, 10, -10, true);
-    Command turnEast = new AimToDirection(m_drivetrain, -90);
-    Command goToMiddleLeft = new GoToPoint(m_drivetrain, 10, -40, true);
-    Command aimToSpeaker1 = new AimToDirection(m_drivetrain, 180);
-    Command shoot1 = new MockShootCommand(m_drivetrain);
-    Command leftSideFetchRoutine = new SequentialCommandGroup(goToLeftSide, turnSouth1, goToLeftSideCorner, turnEast, goToMiddleLeft, aimToSpeaker1, shoot1);
-    leftSideFetchRoutine = leftSideFetchRoutine.until(() -> m_joystick0.getRawButtonPressed(Button.kX.value) == true);
-
-    JoystickButton leftBumper = new JoystickButton(m_joystick0, Button.kLeftBumper.value);
-    leftBumper.onTrue(leftSideFetchRoutine);
   }
 
   public Command getAutonomousCommand() {
