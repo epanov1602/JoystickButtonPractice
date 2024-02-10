@@ -1,4 +1,4 @@
-# Advanced joystick command mapping
+# Advanced teleop automation practice
 
 ## Problem 1
 In class RobotContainer, find initialize() function.
@@ -10,6 +10,14 @@ In that function, add a command to reset robot odometry and assign it to Joystic
 ```
 
 ## Problem 2
+Create a command to go to a specific point on the field where robot is supposed to climb the chain (point coordinates: x=40, y=-20)... and bind that command to button A:
+```
+    Command goToClimbPoint = new GoToPoint(m_drivetrain, 40, -20, false);
+    JoystickButton buttonA = new JoystickButton(m_joystick0, Button.kA.value);
+    buttonA.onTrue(goToClimbPoint);
+```
+
+## Problem 3
 Create a command for bagel pickup and assign it to button B
 ```
     Command pickUpBagel = new MockPickupCommand(m_drivetrain);
@@ -18,7 +26,7 @@ Create a command for bagel pickup and assign it to button B
 ```
 , even though this MockPickupCommand is not a real command (until the intake subsystem works fully).
 
-## Problem 3
+## Problem 4
 Create a more useful autonomous command (for shooting a preloaded gamepiece, and for picking up another one).
 ```
     Command turnAroundToAim = new AimToDirection(m_drivetrain, -135);
@@ -32,7 +40,7 @@ Create a more useful autonomous command (for shooting a preloaded gamepiece, and
     m_autonomousCommand = bigAutonomousRoutine;
 ```
 
-## Problem 4
+## Problem 5
 Create a handy command for bringing the gamepieces back to the location from which we an shoot them into the speaker along the *left* side of the field.
 ```
     // create a command for following the left side of the field and turning to the speaker to shoot, and assign it to the left bumper
@@ -49,12 +57,12 @@ Create a handy command for bringing the gamepieces back to the location from whi
     leftBumper.onTrue(leftSideFetchRoutine);
 ```
 
-## Problem 5
+## Problem 6
 In the command above, make it so that the command only runs until someone pressed "X" button to cancel it.
 To accomplish this, modify `leftSideFetchRoutine` before assigning it to a button. Modify this way:
 ```
     leftSideFetchRoutine = leftSideFetchRoutine.until(() -> m_joystick0.getRawButtonPressed(Button.kX.value) == true);
 ```
 
-## Challenge problem!
+## Challenge problem
 Create a similar command to bring a gamepiece to the speaker, but following the right side of the field instead.
