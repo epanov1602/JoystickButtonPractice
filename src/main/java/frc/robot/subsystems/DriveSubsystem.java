@@ -4,19 +4,24 @@
 
 package frc.robot.subsystems;
 
+import java.io.Console;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
+import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import frc.robot.Constants;
 import frc.robot.sensors.RomiGyro;
 import edu.wpi.first.wpilibj.motorcontrol.Spark;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class Drivetrain extends SubsystemBase {
+public class DriveSubsystem extends SubsystemBase {
   private static final double kCountsPerRevolution = 1440.0;
   private static final double kWheelDiameterInch = 2.75591; // 70 mm
 
@@ -44,7 +49,7 @@ public class Drivetrain extends SubsystemBase {
   private final NetworkTable m_reportedOdometry = NetworkTableInstance.getDefault().getTable("odometry");
 
   /** Creates a new Drivetrain. */
-  public Drivetrain() {
+  public DriveSubsystem() {
     // We need to invert one side of the drivetrain so that positive voltages
     // result in both sides moving forward. Depending on how your robot's
     // gearbox is constructed, you might have to invert the left side instead.
@@ -59,6 +64,10 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public void arcadeDrive(double xaxisSpeed, double zaxisRotate) {
+    m_diffDrive.arcadeDrive(xaxisSpeed, zaxisRotate, false);
+  }
+
+  public void drive(double xaxisSpeed, double yaxisSpeedUnused, double zaxisRotate, boolean unused1, boolean unused2) {
     m_diffDrive.arcadeDrive(xaxisSpeed, zaxisRotate, false);
   }
 
@@ -142,11 +151,19 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public double getOdometryAngleDegrees() {
-    return m_gyro.getAngleZ();
+    return getPose().getRotation().getDegrees();
   }
 
-  public Pose2d getOdometryPosition() {
+  public Pose2d getPose() {
     return m_odometry.getPoseMeters();
+  }
+
+  public DifferentialDriveWheelSpeeds getWheelSpeeds() {
+    return new DifferentialDriveWheelSpeeds(m_leftEncoder.getRate(), m_rightEncoder.getRate());
+  }
+
+  public ChassisSpeeds getChassisSpeeds() {
+    return Constants.DriveConstants.kDriveKinematics.toChassisSpeeds(getWheelSpeeds());
   }
 
   /** Reset the gyro. */
@@ -157,10 +174,10 @@ public class Drivetrain extends SubsystemBase {
   @Override
   public void periodic() {
     // -- update the odometry
-    m_odometry.update(Rotation2d.fromDegrees(m_gyro.getAngleZ()), m_leftEncoder.getDistance(), m_rightEncoder.getDistance());
+    m_odometry.update(Rotation2d.fromDegrees(-m_gyro.getAngleZ()), m_leftEncoder.getDistance(), m_rightEncoder.getDistance());
 
     // -- report the latest odometry
-    Pose2d position = m_odometry.getPoseMeters();
+    Pose2d position = getPose();
     m_reportedOdometry.getEntry("X").setDouble(position.getX());
     m_reportedOdometry.getEntry("Y").setDouble(position.getY());
     m_reportedOdometry.getEntry("heading").setDouble(position.getRotation().getDegrees());
@@ -169,6 +186,6 @@ public class Drivetrain extends SubsystemBase {
   public void resetOdometry() {
     resetGyro();
     resetEncoders();
-    m_odometry.resetPosition(new Rotation2d(), 0, 0, new Pose2d());
+    m_odometry.resetPosition(new Rotation2d(), 0, 0, new Pose2d(Constants.DriveConstants.kInitialX, Constants.DriveConstants.kInitialY, new Rotation2d()));
   }
 }

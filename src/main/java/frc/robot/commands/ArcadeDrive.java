@@ -4,12 +4,12 @@
 
 package frc.robot.commands;
 
-import frc.robot.subsystems.Drivetrain;
+import frc.robot.subsystems.DriveSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import java.util.function.Supplier;
 
 public class ArcadeDrive extends Command {
-  private final Drivetrain m_drivetrain;
+  private final DriveSubsystem m_drivetrain;
   private final Supplier<Double> m_xaxisSpeedSupplier;
   private final Supplier<Double> m_zaxisRotateSupplier;
 
@@ -22,7 +22,7 @@ public class ArcadeDrive extends Command {
    * @param zaxisRotateSupplier Lambda supplier of rotational speed
    */
   public ArcadeDrive(
-      Drivetrain drivetrain,
+      DriveSubsystem drivetrain,
       Supplier<Double> xaxisSpeedSupplier,
       Supplier<Double> zaxisRotateSupplier) {
     m_drivetrain = drivetrain;

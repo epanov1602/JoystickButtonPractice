@@ -4,31 +4,35 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Constants;
 import frc.robot.sensors.RomiLimelight;
-import frc.robot.subsystems.Drivetrain;
+import frc.robot.subsystems.DriveSubsystem;
 
 public class AimToVisualTarget extends Command {
 
-  private final Drivetrain m_drivetrain;
+  private final DriveSubsystem m_drivetrain;
   private final RomiLimelight m_camera;
   private final int m_targetPipelineIndex;
+  private final double m_seekingTurnSpeed;
 
-  private static final double TargetXTolerance = 5; // plus minus five pixels is fine
-  private static final double SeekingTurnSpeed = 0.15;
-  private static final double MaxTurnSpeed = 0.4;
+  private int m_previousPipelineIndex = 0;
 
-  public AimToVisualTarget(Drivetrain drivetrain, RomiLimelight camera, int targetPipelineIndex) {
+  public AimToVisualTarget(DriveSubsystem drivetrain, RomiLimelight camera, int targetPipelineIndex, double seekingTurnSpeed) {
     m_drivetrain = drivetrain;
     m_camera = camera;
     m_targetPipelineIndex = targetPipelineIndex;
+    m_seekingTurnSpeed = seekingTurnSpeed;
     addRequirements(drivetrain);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    m_previousPipelineIndex = m_camera.getPipeline();
     m_camera.setPipeline(m_targetPipelineIndex);
+    m_camera.setLEDOn(true);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -37,23 +41,30 @@ public class AimToVisualTarget extends Command {
     double targetX = m_camera.getX();
     if (targetX == 0) {
       // not seeing the target => keep turning until found it
-      m_drivetrain.arcadeDrive(0, SeekingTurnSpeed);
-    } else {
-      System.out.println("target at x=" + targetX);
-      // if X is negative, we want to turn right; if X is positive, we want to turn left
-      double turnSpeed = -targetX * SeekingTurnSpeed / 15;
-      // 30 is the maximum value of X in Limelight: so if X is already closer than 30, we want to be turning slower than SeekingTurnSpeed (to avoid overshooting)
-      if (turnSpeed > MaxTurnSpeed)
-        turnSpeed = MaxTurnSpeed;
-      else if (turnSpeed < -MaxTurnSpeed)
-        turnSpeed = -MaxTurnSpeed;
-      m_drivetrain.arcadeDrive(0, turnSpeed);
+      m_drivetrain.arcadeDrive(0, m_seekingTurnSpeed);
+      return;
     }
+
+    // targetX is pretty much "how many degrees are left to turn"
+    double degreesLeftToTurn = -targetX;
+    double turningSpeed = Math.abs(degreesLeftToTurn) * Constants.AutoConstants.kRotationStaticGain;
+    if (turningSpeed > Constants.AutoConstants.kMaxTurningSpeed)
+      turningSpeed = Constants.AutoConstants.kMaxTurningSpeed;
+    if (turningSpeed < Constants.AutoConstants.kMinTurningSpeed)
+      turningSpeed = Constants.AutoConstants.kMinTurningSpeed;
+    if (degreesLeftToTurn > Constants.AutoConstants.kDirectionToleranceDegrees)
+      m_drivetrain.arcadeDrive(0, turningSpeed);
+    else if (degreesLeftToTurn < -Constants.AutoConstants.kDirectionToleranceDegrees)
+      m_drivetrain.arcadeDrive(0, -turningSpeed);
+    else
+      m_drivetrain.arcadeDrive(0, 0);
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
+    m_camera.setLEDOn(false);
+    m_camera.setPipeline(m_previousPipelineIndex);
     m_drivetrain.arcadeDrive(0, 0);
   }
 
@@ -61,12 +72,27 @@ public class AimToVisualTarget extends Command {
   @Override
   public boolean isFinished() {
     double targetX = m_camera.getX();
-    if (targetX == 0)
+    if (targetX == 0) {
+      System.out.println("target is not acquired, we keep looking");
       return false; // if target is not acquired, we are not finished
-    else if (-TargetXTolerance < targetX && targetX < TargetXTolerance) {
-      System.out.print("target acquired at x=" + targetX);
-      return true; // if target is pretty close to center of the screen, we are finished
-    } else
-      return false; // otherwise, we are not finished yet
+    }
+    double degreesLeftToTurn = -targetX;
+
+    // are we facing good angle?
+    if (Math.abs(degreesLeftToTurn) > Constants.AutoConstants.kDirectionToleranceDegrees) {
+      System.out.println("still busy with " + degreesLeftToTurn + " degrees left to turn to aim into target");
+      return false;
+    }
+
+    // we are at good angle, but is the chassis stopped? (i.e. won't overshoot the turn)
+    ChassisSpeeds chassisSpeeds = m_drivetrain.getChassisSpeeds();
+    double turningSpeed = chassisSpeeds.omegaRadiansPerSecond * (180.0 / Math.PI);
+    if (Math.abs(turningSpeed) > Constants.AutoConstants.kTurningSpeedToleranceDegreesPerSecond) {
+      System.out.println("turning speed " + turningSpeed + " degrees per second when aiming into target");
+      return false;
+    }
+
+    // if we are here, we are aimed and the chassis is almost not moving 
+    return true;
   }
 }

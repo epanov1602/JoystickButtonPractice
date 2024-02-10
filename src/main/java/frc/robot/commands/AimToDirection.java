@@ -4,18 +4,16 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.Drivetrain;
+import frc.robot.Constants;
+import frc.robot.subsystems.DriveSubsystem;
 
 public class AimToDirection extends Command {
-  private Drivetrain m_drivetrain;
+  private DriveSubsystem m_drivetrain;
   private double m_targetDirectionDegrees;
 
-  private static final double ForwardSpeed = 0.5;
-  private static final double TurningSpeed = 0.4;
-  private static final double DirectionToleranceDegrees = 20; // plus minus 20 degrees of direction tolerance is ok
-
-  public AimToDirection(Drivetrain drivetrain, double targetDirectionDegrees) {
+  public AimToDirection(DriveSubsystem drivetrain, double targetDirectionDegrees) {
     m_drivetrain = drivetrain;
     m_targetDirectionDegrees = targetDirectionDegrees;
     addRequirements(drivetrain);
@@ -28,22 +26,19 @@ public class AimToDirection extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    // are we heading towards target, or we need to turn?
-    double currentHeadingDegrees = m_drivetrain.getOdometryAngleDegrees();
-    if (currentHeadingDegrees < m_targetDirectionDegrees - DirectionToleranceDegrees) {
-      System.out.println("turning right, because heading too far left:" +
-        " currentHeading=" + currentHeadingDegrees + ", directionToTarget=" + m_targetDirectionDegrees);
-      m_drivetrain.arcadeDrive(0, -TurningSpeed);
-    }
-    else if (currentHeadingDegrees > m_targetDirectionDegrees + DirectionToleranceDegrees) {
-      System.out.println("turning right, because heading too far left:" +
-        " currentHeading=" + currentHeadingDegrees + ", directionToTarget=" + m_targetDirectionDegrees);
-      m_drivetrain.arcadeDrive(0, TurningSpeed);
-    }
-    else {
-      // we are heading more or less towards the target, let's just go straight
-      m_drivetrain.arcadeDrive(ForwardSpeed, 0);
-    }
+    double degreesLeftToTurn = getDegreesLeftToTurn();
+    double turningSpeed = Math.abs(degreesLeftToTurn) * Constants.AutoConstants.kRotationStaticGain;
+    if (turningSpeed > Constants.AutoConstants.kMaxTurningSpeed)
+      turningSpeed = Constants.AutoConstants.kMaxTurningSpeed;
+    if (turningSpeed < Constants.AutoConstants.kMinTurningSpeed)
+      turningSpeed = Constants.AutoConstants.kMinTurningSpeed;
+
+    if (degreesLeftToTurn > Constants.AutoConstants.kDirectionToleranceDegrees)
+      m_drivetrain.arcadeDrive(0, turningSpeed);
+    else if (degreesLeftToTurn < -Constants.AutoConstants.kDirectionToleranceDegrees)
+      m_drivetrain.arcadeDrive(0, -turningSpeed);
+    else
+      m_drivetrain.arcadeDrive(0, 0);
   }
 
   // Called once the command ends or is interrupted.
@@ -55,12 +50,38 @@ public class AimToDirection extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    double currentHeadingDegrees = m_drivetrain.getOdometryAngleDegrees();
-    if (currentHeadingDegrees < m_targetDirectionDegrees - DirectionToleranceDegrees)
-      return false; // have to turn right, not finished
-    else if (currentHeadingDegrees > m_targetDirectionDegrees + DirectionToleranceDegrees)
-      return false; // have to turn left, not finished
-    else
-      return true; // do not need to turn anywhere, finished
+    // are we facing good angle?
+    double degreesLeftToTurn = getDegreesLeftToTurn();
+    if (Math.abs(degreesLeftToTurn) > Constants.AutoConstants.kDirectionToleranceDegrees) {
+      System.out.println("still busy with " + degreesLeftToTurn + " degrees left to turn");
+      return false;
+    }
+
+    // we are at good angle, but is the chassis stopped? (i.e. won't overshoot the turn)
+    ChassisSpeeds chassisSpeeds = m_drivetrain.getChassisSpeeds();
+    double turningSpeed = chassisSpeeds.omegaRadiansPerSecond * (180.0 / Math.PI);
+    if (Math.abs(turningSpeed) > Constants.AutoConstants.kTurningSpeedToleranceDegreesPerSecond) {
+      System.out.println("turning speed " + turningSpeed + " degrees per second");
+      return false;
+    }
+
+    // if we are here, we are aimed and the chassis is almost not moving 
+    return true;
+  }
+
+  private double getDegreesLeftToTurn() {
+    // are we heading towards target, or we need to turn?
+    double currentHeadingDegrees = m_drivetrain.getPose().getRotation().getDegrees();
+    double degreesLeftToTurn = m_targetDirectionDegrees - currentHeadingDegrees;
+
+    // if we have +350 degrees left to turn, this really means we have -10 degrees left to turn
+    while (degreesLeftToTurn > 180)
+      degreesLeftToTurn -= 360;
+
+    // if we have -350 degrees left to turn, this really means we have +10 degrees left to turn
+    while (degreesLeftToTurn < -180)
+      degreesLeftToTurn += 360;
+
+    return degreesLeftToTurn;
   }
 }

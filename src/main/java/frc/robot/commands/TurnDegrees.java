@@ -4,11 +4,11 @@
 
 package frc.robot.commands;
 
-import frc.robot.subsystems.Drivetrain;
+import frc.robot.subsystems.DriveSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class TurnDegrees extends Command {
-  private final Drivetrain m_drive;
+  private final DriveSubsystem m_drive;
   private final double m_degrees;
   private final double m_speed;
 
@@ -20,7 +20,7 @@ public class TurnDegrees extends Command {
    * @param degrees Degrees to turn. Leverages encoders to compare distance.
    * @param drive The drive subsystem on which this command will run
    */
-  public TurnDegrees(double speed, double degrees, Drivetrain drive) {
+  public TurnDegrees(double speed, double degrees, DriveSubsystem drive) {
     m_degrees = degrees;
     m_speed = speed;
     m_drive = drive;

@@ -19,7 +19,7 @@ public class RomiLimelight {
   public static final int LimelightNTRegistrationPort = 5899;
 
   protected NetworkTable m_table;
-  private NetworkTableEntry m_tx, m_ty, m_ta, m_pipeline;
+  private NetworkTableEntry m_tx, m_ty, m_ta, m_pipeline, m_ledMode;
 
   public double getX() { return m_tx.getDouble(0.0); }
   public double getY() { return m_ty.getDouble(0.0); }
@@ -28,12 +28,20 @@ public class RomiLimelight {
   public int getPipeline() { return (int)m_pipeline.getDouble(-1); }
   public void setPipeline(int pipeline) { m_pipeline.setDouble(pipeline); }
 
+  public void setLEDOn(boolean on) {
+    if (on)
+      m_ledMode.setNumber(3);
+    else
+      m_ledMode.setNumber(1);
+  }
+
   /** Create a new RomiLimelight. */
   public RomiLimelight() {
     registerForNetworkTables();
 
     m_table = NetworkTableInstance.getDefault().getTable("limelight");
     m_pipeline = m_table.getEntry("pipeline");
+    m_ledMode = m_table.getEntry("ledMode");
     m_tx = m_table.getEntry("tx");
     m_ty = m_table.getEntry("ty");
     m_ta = m_table.getEntry("ta");
