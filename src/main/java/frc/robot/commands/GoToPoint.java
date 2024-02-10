@@ -89,7 +89,7 @@ public class GoToPoint extends Command {
         return false;
     }
     // otherwise we are almost stopped and almost at target
-    return false;
+    return true;
   }
 
   // how far are we from the target

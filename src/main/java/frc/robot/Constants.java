@@ -20,7 +20,7 @@ public final class Constants {
     public final class DriveConstants {
         // initial position of robot on the field (does not have to be {x=0, y=0})
         public static final double kInitialX = 10;
-        public static final double kInitialY = 10;
+        public static final double kInitialY = -10;
 
         // how to convert wheel speed into turning speeds (depends how far apart the wheels are)
         public static final DifferentialDriveKinematics kDriveKinematics = new DifferentialDriveKinematics(6); // 6 inches between wheels
@@ -29,11 +29,11 @@ public final class Constants {
     // constants to tune for this specific chassis
     public final class AutoConstants {
         // turning
-        public static final double kRotationStaticGain = 0.006;
+        public static final double kRotationStaticGain = 0.007;
         public static final double kMaxTurningSpeed = 0.99;
         public static final double kMinTurningSpeed = 0.07; // any value lower than this causes motors to not spin at all
-        public static final double kDirectionToleranceDegrees = 3; // plus minus 5 degrees of direction tolerance is ok
-        public static final double kTurningSpeedToleranceDegreesPerSecond = 3; // if the chassis is moving slower than this and facing the right way, we can stop aiming
+        public static final double kDirectionToleranceDegrees = 7; // plus minus 7 degrees of direction tolerance is ok
+        public static final double kTurningSpeedToleranceDegreesPerSecond = 7; // if the chassis is moving slower than this and facing the right way, we can stop aiming
       
         // driving
         public static final double kForwardStaticGain = 0.08;
